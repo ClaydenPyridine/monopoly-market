@@ -1,0 +1,1414 @@
+/* ============================================================
+ * 《地产股神》v0.1 — 样式
+ * 设计语言：深色金融终端 + 铜金描边；棋盘是有厚度的"实体板"，
+ * 色组条朝向棋盘内侧，四角是独立设计的功能格。
+ * 全部用 CSS/SVG 绘制，不依赖任何图片素材。
+ * ============================================================ */
+:root {
+  --bg: #060b14;
+  --bg-soft: #0b1424;
+  --board: #0e1a2c;
+  --panel: #111c2e;
+  --panel-2: #16233a;
+  --line: #22334f;
+  --line-soft: #1a2740;
+  --text: #e9f0fb;
+  --dim: #93a7c4;
+  --dim-2: #5f7392;
+  --up: #34d399;
+  --down: #fb7185;
+  --gold: #f5c451;
+  --gold-dim: #b98f2e;
+  --blue: #5aa9e6;
+  --radius: 12px;
+  --shadow-lg: 0 30px 80px rgba(0, 0, 0, .6);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, .45);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(1100px 700px at 22% -8%, rgba(90, 169, 230, .13), transparent 62%),
+    radial-gradient(900px 620px at 92% 8%, rgba(245, 196, 81, .08), transparent 60%),
+    radial-gradient(800px 800px at 50% 120%, rgba(52, 211, 153, .07), transparent 65%);
+}
+
+button { font-family: inherit; cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .4; }
+b, strong { font-variant-numeric: tabular-nums; }
+
+#app {
+  position: relative; z-index: 1;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100vh;
+}
+
+/* ════════════════ 顶栏 ════════════════ */
+#topbar {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(19, 32, 55, .96), rgba(9, 16, 28, .96));
+  backdrop-filter: blur(8px);
+}
+.brand {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 17px; font-weight: 800; letter-spacing: 2px;
+  background: linear-gradient(100deg, #fff 20%, var(--gold) 90%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  white-space: nowrap;
+}
+.brand .logo {
+  width: 22px; height: 22px; flex: none;
+  color: var(--gold); opacity: .95;
+}
+.brand .logo svg { width: 100%; height: 100%; display: block; }
+.brand .ver {
+  font-size: 10px; font-weight: 600; letter-spacing: .5px;
+  color: var(--dim-2); background: rgba(255,255,255,.05);
+  padding: 1px 5px; border-radius: 4px;
+  -webkit-text-fill-color: var(--dim-2);
+}
+.topstats { display: flex; gap: 8px; flex: 1; }
+.ts {
+  display: flex; align-items: baseline; gap: 7px;
+  padding: 4px 12px; border-radius: 9px;
+  background: rgba(255, 255, 255, .028);
+  border: 1px solid var(--line-soft);
+}
+.ts label { color: var(--dim-2); font-size: 10.5px; letter-spacing: .5px; }
+.ts b { font-size: 15px; letter-spacing: .3px; }
+/* ★ 联机时可以起任意长的名字，`#ts-current` 没有上限时会把顶栏从 51px 撑到 90px，
+   进而把棋盘挤出容器（实测 1024×768 超出 12px）。截断 + 省略号。 */
+.ts b#ts-current { max-width: 22ch; display: inline-block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.topactions { display: flex; gap: 6px; }
+
+.btn {
+  position: relative;
+  background: linear-gradient(180deg, #3579f6, #1e4fd0);
+  border: 1px solid rgba(255, 255, 255, .12);
+  color: #fff; padding: 7px 14px; border-radius: 9px;
+  font-size: 12px; font-weight: 600; letter-spacing: .3px;
+  box-shadow: 0 3px 10px rgba(30, 79, 208, .3), inset 0 1px 0 rgba(255,255,255,.16);
+  transition: transform .12s, filter .15s, box-shadow .2s;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.13); transform: translateY(-1px); }
+.btn:active:not(:disabled) { transform: translateY(0); }
+.btn.ghost {
+  background: rgba(255, 255, 255, .045);
+  border: 1px solid var(--line);
+  color: var(--dim); box-shadow: none;
+}
+.btn.ghost:hover:not(:disabled) { color: #fff; background: rgba(255, 255, 255, .1); }
+.btn.big { padding: 13px 40px; font-size: 15px; border-radius: 12px; }
+.btn.ok {
+  background: linear-gradient(180deg, #22c55e, #12833f);
+  box-shadow: 0 3px 12px rgba(18, 131, 63, .35), inset 0 1px 0 rgba(255,255,255,.18);
+}
+.btn.gold {
+  background: linear-gradient(180deg, #f5c451, #c98f16);
+  color: #2a1a00; border-color: rgba(255,255,255,.3);
+  box-shadow: 0 3px 14px rgba(245, 196, 81, .35), inset 0 1px 0 rgba(255,255,255,.4);
+}
+.btn.danger { background: linear-gradient(180deg, #ef4444, #a51f1f); }
+
+.delta { font-size: 12px; font-variant-numeric: tabular-nums; }
+.delta.up { color: var(--up); }
+.delta.down { color: var(--down); }
+
+/* ════════════════ 主区（棋盘独占，右侧抽屉按需展开）════════════════ */
+main {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 14px 18px;
+  min-height: 0;
+  transition: padding-right .24s cubic-bezier(.3, 1, .4, 1);
+}
+#app:not(.drawer-open) main { padding-right: 90px; }
+#app.drawer-open main { padding-right: 428px; }
+#boardwrap { display: grid; place-items: center; min-height: 0; min-width: 0; }
+
+/* ── 右侧竖排按钮 ── */
+#rail {
+  position: fixed; right: 16px; top: 68px; width: 58px; z-index: 60;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.rail-btn {
+  width: 58px; padding: 10px 0 8px; border-radius: 13px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02));
+  border: 1px solid var(--line); color: var(--dim);
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  transition: all .16s ease;
+}
+.rail-btn svg { width: 21px; height: 21px; }
+.rail-btn .rlab { font-size: 10.5px; letter-spacing: 1.5px; }
+.rail-btn .rsub { font-size: 9.5px; color: var(--dim-2); font-variant-numeric: tabular-nums; font-style: normal; }
+.rail-btn:hover { color: #fff; border-color: #33507c; transform: translateX(-2px); }
+.rail-btn.on {
+  background: linear-gradient(180deg, rgba(90, 169, 230, .3), rgba(90, 169, 230, .07));
+  color: #fff; border-color: rgba(90, 169, 230, .6);
+  box-shadow: 0 0 20px rgba(90, 169, 230, .25);
+}
+.rail-btn .rsub.up { color: var(--up); }
+.rail-btn .rsub.down { color: var(--down); }
+.rail-btn.hint {
+  border-color: rgba(245, 196, 81, .6); color: var(--gold);
+  animation: railHint 1.6s ease-in-out infinite;
+}
+@keyframes railHint {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 196, 81, 0); }
+  50% { box-shadow: 0 0 0 6px rgba(245, 196, 81, .1), 0 0 22px rgba(245, 196, 81, .35); }
+}
+
+/* ── 抽屉 ── */
+#drawers .drawer {
+  position: fixed; right: 84px; top: 68px; bottom: 148px; width: 332px; z-index: 55;
+  background: linear-gradient(180deg, #121e32, #0b1423);
+  border: 1px solid var(--line); border-radius: 14px;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 26px 70px rgba(0, 0, 0, .6);
+  opacity: 0; pointer-events: none; transform: translateX(26px) scale(.98);
+  transition: transform .22s cubic-bezier(.3, 1, .4, 1), opacity .2s ease;
+}
+#drawers .drawer.open { opacity: 1; pointer-events: auto; transform: none; }
+.drawer-head {
+  display: flex; align-items: center; gap: 8px; flex: none;
+  padding: 10px 12px; border-bottom: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(255, 255, 255, .05), transparent);
+}
+.drawer-head b { flex: 1; font-size: 12.5px; letter-spacing: 1.4px; color: #cfe0f5; }
+.drawer-close {
+  background: transparent; border: none; color: var(--dim-2);
+  font-size: 14px; line-height: 1; padding: 4px 7px; border-radius: 7px;
+}
+.drawer-close:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+
+/* ════════════════ 棋盘 ════════════════ */
+#board {
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+  gap: 3px;
+  /* ★ 尺寸扣掉顶栏 + 底栏。这里能安全用常数 210px，是因为**顶栏高度已被钉死**：
+     `#ts-current` 加了省略号（见 .ts b#ts-current），长玩家名不会再把它从 51px 撑到 90px。
+     试过改用 `height:100%` 由容器驱动 —— 不行：`#boardwrap` 是 `place-items:center`，
+     高度不是确定值，百分比高度失效，棋盘反而涨到 865px 超出容器 492px。 */
+  width: min(100%, calc((100vh - 210px) * 1.5));
+  aspect-ratio: 3 / 2;
+  padding: 9px;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(90, 169, 230, .05), transparent 62%),
+    linear-gradient(158deg, #12203a 0%, #0a1424 55%, #0d1a2d 100%);
+  border: 1px solid #21334f;
+  box-shadow:
+    0 0 0 1px rgba(245, 196, 81, .13),
+    0 0 0 7px rgba(255, 255, 255, .015),
+    var(--shadow-lg),
+    inset 0 0 100px rgba(24, 46, 80, .4);
+}
+
+/* ── 棋子格 ── */
+.tile {
+  position: relative;
+  display: flex;
+  /* ★ 地区色铺一层淡底纹：以前地区色只在顶边一根细条上，玩家根本认不出"这块属于哪个区"。
+     现在整格都带所属地区的色相，扫一眼就能看出区域分布。 */
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gc, #30425f) 15%, transparent), transparent 72%),
+    linear-gradient(180deg, #182741, #131f34);
+  border: 1px solid #223450;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  min-width: 0;
+  --own: transparent;
+  --gc: #30425f;
+  transition: transform .14s cubic-bezier(.3, 1.4, .5, 1), box-shadow .14s, border-color .2s;
+}
+.tile::after {                       /* 持有人染色 */
+  content: '';
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, var(--own), transparent 82%);
+  opacity: .3;
+}
+/* 无主地块：用地区色描一圈内边，进一步强化"这是哪个区" */
+.tile:not(.owned):not(.corner) {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gc, #30425f) 42%, transparent);
+}
+.tile.owned {
+  border-color: var(--own);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--own) 55%, transparent),
+              inset 0 0 0 3px color-mix(in srgb, var(--gc, #30425f) 22%, transparent);
+}
+/* ★ 垄断：一个人独占整个地区。以前棋盘上完全没有标识——最重要的翻盘点看不见。
+   现在整格泛该地区的强光 + 呼吸，一眼看出谁控盘。 */
+.tile.mono {
+  border-color: var(--gc, #30425f);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gc, #30425f) 85%, transparent),
+              inset 0 0 20px color-mix(in srgb, var(--gc, #30425f) 55%, transparent),
+              0 0 14px color-mix(in srgb, var(--gc, #30425f) 60%, transparent);
+  animation: monoPulse 2.4s ease-in-out infinite;
+}
+@keyframes monoPulse {
+  0%, 100% { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gc, #30425f) 85%, transparent),
+                         inset 0 0 20px color-mix(in srgb, var(--gc, #30425f) 55%, transparent),
+                         0 0 14px color-mix(in srgb, var(--gc, #30425f) 60%, transparent); }
+  50%      { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--gc, #30425f) 95%, transparent),
+                         inset 0 0 26px color-mix(in srgb, var(--gc, #30425f) 70%, transparent),
+                         0 0 22px color-mix(in srgb, var(--gc, #30425f) 85%, transparent); }
+}
+.tile:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .18);
+  z-index: 5;
+}
+.tile .bar { flex: none; background: #30425f; }
+.tile .body {
+  flex: 1; min-width: 0; min-height: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  /* ★ 上下内边距必须极小：小分辨率下格子只有 ~29px 高，
+     用垂直留白去避让头像/棋子会把地名直接压成 0 高度（实测 1280×720 下 36/40 格地名消失）。
+     改成横向避让（见 .nm 的 padding-right），底部只给"真的有棋子"的格子留位置。 */
+  padding: 2px 3px 1px; position: relative; z-index: 1;
+}
+/* 有棋子的格子才让出底部轨道，没棋子的格子把空间全留给文字 */
+.tile.has-tk .body { padding-bottom: clamp(11px, 1.15vw, 17px); }
+.tile .info { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.tile .meta { display: flex; align-items: center; justify-content: space-between; gap: 3px; min-width: 0; }
+
+/* ★ 头像槽：浮在右上角。地名用 padding-right 横向让位（而不是靠上内边距纵向让位），
+   这样小格子上也不会把文字挤没。 */
+.tile .ava {
+  position: absolute; top: 1px; right: 1px; z-index: 4;
+  width: clamp(11px, .95vw, 16px); height: clamp(11px, .95vw, 16px); border-radius: 50%;
+  display: grid; place-items: center; overflow: hidden;
+  background: radial-gradient(circle at 32% 26%,
+    color-mix(in srgb, var(--ec, #5f7392) 58%, #0b1220), #0b1220 80%);
+  border: 1.3px solid color-mix(in srgb, var(--ec, #5f7392) 75%, transparent);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .6), 0 0 7px color-mix(in srgb, var(--ec, #5f7392) 45%, transparent);
+  color: var(--ec, #5f7392);
+}
+.tile .ava svg { width: 62%; height: 62%; display: block; }
+.tile .ava img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; border-radius: 50%;
+}
+/* 官方元素徽记是 64×64 带透明边距的，用 contain 别裁掉 */
+.tile .ava img.el { object-fit: contain; padding: 8%; }
+.tile .ava.has-img svg { display: none; }
+.tile .ava.has-img img.el { display: none; }
+.tile .ava.elem-img svg { display: none; }
+.tile .nm {
+  font-size: clamp(8px, .68vw, 10.5px); font-weight: 700; line-height: 1.15;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: #e2ebf9; letter-spacing: .1px;
+  /* ★ flex:none 是关键：`.nm` 是纵向 flex 的子项，又有 overflow:hidden，
+     于是 min-height:auto 解析成 0，能被压成 0 高度、名字直接消失（实测 36/40 格）。
+     钉死它不许收缩，文字就一定会画出来。 */
+  flex: none;
+  /* 右上角头像占掉的那点宽度用横向内边距让开，避免文字钻到头像下面 */
+  padding-right: clamp(12px, 1vw, 17px);
+}
+.tile .meta { flex: none; }
+.tile.corner .nm { padding-right: 0; }
+.tile .pr {
+  font-size: clamp(7px, .62vw, 10px); color: #9db1cd;
+  font-variant-numeric: tabular-nums; line-height: 1.25; letter-spacing: .2px;
+}
+.tile .own-name {
+  font-size: clamp(7px, .6vw, 9.5px); font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;
+}
+.tile .lv { display: flex; gap: 1.5px; flex: none; }
+.tile .lv i {
+  width: 5px; height: 4px; border-radius: 1px;
+  background: var(--gold); box-shadow: 0 0 5px rgba(245, 196, 81, .7);
+}
+.tile .own-name.cn { color: #8fa3bf; opacity: .8; font-weight: 500; }
+.tile .tokens {
+  position: absolute; left: 1px; right: 1px; bottom: 1px; z-index: 6;
+  display: flex; gap: 2px; flex-wrap: nowrap; justify-content: center; align-items: flex-end;
+  pointer-events: none;
+}
+/* ★ 棋子：flex:none 必须写 —— 否则 4 个人同格时会被 flex 压成 2×3 像素（实测踩过）。 */
+/* ★ 棋子尺寸必须跟**视口高度**走，不能跟宽度（1.1vw）走。
+   原因：格子大小由可用高度决定（棋盘 3:2、高度受限），而 1.1vw 跟宽度走 —— 两者会脱钩：
+   在"宽而矮"的窗口（如 1440×700）里棋子会大到装不下，4 人同格时最左/最右各被
+   `.tile{overflow:hidden}` 裁掉一块（实测末枚棋子右缘超格子 3.5px）。
+   推导：棋盘高 H=100vh−210，格宽 ≈1.5H/11，4 枚棋子 + 3 个 2px 间隙要装进格宽
+   → sz ≈ 0.0341H − 2.25 = 3.4vh − 9.4px。 */
+.tk {
+  --sz: clamp(9px, calc(3.4vh - 9.4px), 19px);
+  flex: none;
+  width: var(--sz); height: var(--sz); border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: calc(var(--sz) * .52); font-weight: 900; color: #0b1220;
+  background: radial-gradient(circle at 32% 28%, #fff 0%, var(--c) 46%, color-mix(in srgb, var(--c) 60%, #000) 100%);
+  border: 2px solid rgba(255, 255, 255, .95);
+  box-shadow: 0 3px 9px rgba(0, 0, 0, .8), 0 0 12px var(--c), 0 0 0 1px rgba(0, 0, 0, .5);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+}
+/* ⚠️ 棋子**绝对不能**挂进场动画（曾经这里写死 `animation: tkpop`，from 是 scale(.2)）。
+   原因：syncBoard 每次状态推送都会重建棋子 DOM → 动画被无限重启 → 永远停在 scale(.2)，
+   棋子实际只有 3×3 像素。这行 bug 真实发生过。要做进场效果只能用 .pop 类手动加。 */
+@keyframes tkpop { from { transform: scale(.2) translateY(-8px); opacity: 0; } }
+.tk.pop { animation: tkpop .3s cubic-bezier(.2, 1.6, .4, 1); }
+/* 正在行动的人：金色呼吸光环，全场最显眼。
+   **只动 box-shadow、不动 transform** —— 这样动画被频繁重启也看不出跳变，更不会缩小棋子。 */
+.tk.cur {
+  border-color: #fff;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .85), 0 0 0 2.5px var(--gold), 0 0 18px 3px rgba(245, 196, 81, .85);
+  animation: curBreath 1.4s ease-in-out infinite;
+  z-index: 2;
+}
+@keyframes curBreath {
+  0%, 100% { box-shadow: 0 3px 10px rgba(0,0,0,.85), 0 0 0 2.5px var(--gold), 0 0 13px 2px rgba(245, 196, 81, .65); }
+  50%      { box-shadow: 0 3px 12px rgba(0,0,0,.85), 0 0 0 3px   var(--gold), 0 0 22px 5px rgba(245, 196, 81, 1); }
+}
+/* 我自己：底下加一个白色小三角指向，联机时不用找 */
+.tk.me::after {
+  content: ''; position: absolute; top: -5px; left: 50%; margin-left: -3px;
+  border-left: 3px solid transparent; border-right: 3px solid transparent;
+  border-top: 4px solid #fff; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .9));
+}
+.tk.me { position: relative; }
+.tk.cur.me { animation: none; transform: translateY(-1px); }
+
+/* 色组条朝向棋盘内侧 —— 加粗并让它发光，地区色才立得住。
+   高度跟着视口走：小窗口下格子只有 ~29px，固定 7px 会把文字挤没。 */
+.tile.side-top { flex-direction: column; }
+.tile.side-top .bar { height: clamp(4px, .55vh, 7px); }
+.tile.side-bottom { flex-direction: column-reverse; }
+.tile.side-bottom .bar { height: clamp(4px, .55vh, 7px); }
+.tile.side-left { flex-direction: row-reverse; }
+.tile.side-left .bar { width: clamp(4px, .55vh, 7px); }
+.tile.side-right { flex-direction: row; }
+.tile.side-right .bar { width: clamp(4px, .55vh, 7px); }
+.tile .bar { box-shadow: 0 0 8px color-mix(in srgb, var(--gc, #30425f) 80%, transparent); }
+
+/* ★ 窗口越矮，棋盘越小，格子里的东西就越装不下。分档牺牲，优先级：
+   地名（识别地块） > 棋子（谁在哪） > 价格 > 地区色条 > 头像。
+   ⚠️ 价格**不再隐藏** —— 用户明确反馈"第一眼看不到基础价格"，而价格是判断该不该买的关键。
+   棋盘改成长方形后横向空间富余，所以改成把地名和价格**并排一行**：省下一整行高度，价格始终可见。 */
+@media (max-height: 880px) {
+  .tile .body { flex-direction: row; align-items: center; justify-content: center; gap: 3px; padding: 2px 2px 1px; }
+  .tile .nm { flex: 0 1 auto; padding-right: 0; font-size: clamp(7.5px, .62vw, 9.5px); letter-spacing: 0; }
+  .tile .pr { font-size: clamp(6.5px, .54vw, 8.5px); letter-spacing: 0; }
+  .tile .meta { flex: none; }
+}
+@media (max-height: 700px) {
+  /* 再矮也只收头像，不碰价格。地区色已经铺满整格，头像这时是冗余信息。 */
+  .tile .ava { display: none; }
+  .tile .bar { box-shadow: none; }
+}
+
+.tile.owned { background:
+    linear-gradient(180deg, color-mix(in srgb, var(--own) 30%, transparent), transparent 78%),
+    linear-gradient(180deg, color-mix(in srgb, var(--gc, #30425f) 13%, transparent), transparent 72%),
+    linear-gradient(180deg, #1c2c48, #14213a); }
+.tile.mortgaged { filter: saturate(.35); }
+.tile.mortgaged .body { opacity: .72; }
+.tile .badge {
+  position: absolute; left: 2px; top: 2px; z-index: 5;
+  font-size: 8px; padding: 0 3px; border-radius: 3px;
+  background: rgba(120, 20, 30, .85); color: #ffd7d7;
+  border: 1px solid rgba(255, 120, 120, .4);
+}
+.tile .badge.call {
+  background: rgba(180, 30, 10, .95); color: #fff;
+  border-color: #ff9f6b; animation: callBlink 1s steps(2) infinite;
+}
+.tile .badge.opt { background: rgba(96, 70, 12, .92); color: #ffe9b0; border-color: rgba(245, 196, 81, .5); }
+@keyframes callBlink { 50% { opacity: .45; } }
+.tile.here::before {
+  content: ''; position: absolute; inset: -1px; border-radius: 7px; z-index: 2;
+  border: 1.5px solid var(--here, #fff);
+  box-shadow: 0 0 14px var(--here, #fff), inset 0 0 12px rgba(255, 255, 255, .12);
+  animation: herePulse 1.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes herePulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+/* ── 四角 ── */
+.tile.corner {
+  background: linear-gradient(150deg, #1b2c49, #0f1a2c 70%);
+  border-color: #2b4066;
+  box-shadow: inset 0 0 22px rgba(90, 169, 230, .1);
+}
+/* 角落格子没有头像槽，但 icon+名字 更高。icon 允许收缩，地名不许被压掉。 */
+.tile.corner .body { align-items: center; text-align: center; gap: 1px; padding: 2px 3px 1px; }
+.tile.corner.has-tk .body { padding-bottom: clamp(11px, 1.15vw, 17px); }
+.tile.corner .icon { flex: 0 1 auto; min-height: 0; }
+.tile.corner .nm { flex: none; }
+.tile.corner .icon { width: 46%; max-width: 30px; aspect-ratio: 1; opacity: .92; }
+.tile.corner .icon svg { width: 100%; height: 100%; display: block; }
+.tile.corner .nm { font-size: clamp(8px, .74vw, 11.5px); letter-spacing: .5px; }
+.tile.t-go .icon { color: var(--up); }
+.tile.t-go { border-color: rgba(52, 211, 153, .45); }
+.tile.t-jail .icon, .tile.t-gotojail .icon { color: #fb923c; }
+.tile.t-jail, .tile.t-gotojail { border-color: rgba(251, 146, 60, .4); }
+.tile.t-parking .icon { color: #7dd3fc; }
+
+/* 非角格：功能格 */
+.tile.t-chance .body, .tile.t-fate .body, .tile.t-tax .body { align-items: center; text-align: center; }
+.tile.t-chance { background: linear-gradient(180deg, #10344d, #0d2438); border-color: #1d5476; }
+.tile.t-fate { background: linear-gradient(180deg, #2c1c4d, #1e1338); border-color: #4b3579; }
+.tile.t-tax { background: linear-gradient(180deg, #3d1626, #2a0f1c); border-color: #6d2438; }
+.tile.t-parking { background: linear-gradient(180deg, #1c2c3f, #152231); }
+.tile.t-rail { background: linear-gradient(180deg, #22303f, #18232f); }
+.tile.t-utility { background: linear-gradient(180deg, #10323c, #0d242c); border-color: #1b5464; }
+
+/* ════════════════ 棋盘中央 ════════════════ */
+/* ★ 关键：中间面板用 max-content 按内容撑开，高度不够时由 #center 滚动。
+   之前面板是 height:100%（固定高），grid 会把 auto 行压缩到比内容还矮，
+   子元素就溢出互相压叠（实测 364px 高的面板里，turn-box 内容要 122px 只给 62px）。
+   让它"长高"而不是"被压扁"，从根上消除压叠。 */
+#center { grid-area: 2 / 2 / 11 / 11; position: relative; min-width: 0; min-height: 0; display: grid; place-items: center; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+.center-grid {
+  width: 100%; height: max-content; min-height: 100%; position: relative;
+  display: grid;
+  /* ★ 棋盘改成长方形后，中央区域是宽矩形，两栏布局会让右栏下方留一大片空白。
+     改成三栏：REI 图 | 回合+骰子+操作 | 统计+资产，横向用满。 */
+  grid-template-columns: 1.02fr 1fr 1fr;
+  /* ★ 五行全部 auto（=严格按内容高）。之前的 `1fr` 和逼仄的窗口会让
+     grid 把行压到比内容还矮，子元素就溢出互相压叠（实测：面板 364px 时
+     turn-box 内容要 122px 只给 62px、mini-stats 要 147px 只给 42px）。
+     现在装不下就由面板自己滚动，绝不压缩、绝不压叠。 */
+  grid-template-rows: auto auto auto auto auto;
+  /* ★ 用 stretch 而不是 start：面板被 min-height:100% 撑满后，start 会把所有行
+     堆在顶部、底下留一大片空白（实测面板 463px 高、内容只占 270px）。
+     stretch 把多出来的空间均分给 auto 行，内容自然铺开；
+     空间不够时它什么都不做（只加不压），不会重蹈"行被压扁"的覆辙。 */
+  align-content: stretch;
+  gap: 9px; padding: 13px;
+  border-radius: 12px;
+  background:
+    radial-gradient(520px 320px at 24% 8%, rgba(90, 169, 230, .1), transparent 68%),
+    radial-gradient(420px 300px at 88% 96%, rgba(245, 196, 81, .06), transparent 70%),
+    linear-gradient(180deg, #0d1728, #0a1220);
+  border: 1px solid #1c2c46;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .04), inset 0 0 60px rgba(0, 0, 0, .5);
+  /* 窗口实在太小就滚动，绝不把内容叠在一起 */
+  overflow-x: hidden; overflow-y: auto;
+  scrollbar-width: thin;
+}
+/* 面板里每个块自己不许外溢：宁可裁剪，也不许盖到邻居身上 */
+.center-grid > * { min-height: 0; min-width: 0; }
+.center-grid::before {            /* 底纹网格 */
+  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .35;
+  background-image:
+    linear-gradient(rgba(120, 170, 230, .05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 170, 230, .05) 1px, transparent 1px);
+  background-size: 26px 26px;
+  mask-image: radial-gradient(circle at 50% 45%, #000 30%, transparent 82%);
+}
+
+.rei-box {
+  grid-column: 1; grid-row: 1 / 6;
+  position: relative;
+  background: linear-gradient(180deg, rgba(11, 20, 34, .92), rgba(9, 16, 28, .92));
+  border: 1px solid #1f304c; border-radius: 10px;
+  padding: 11px 13px; display: flex; flex-direction: column; min-height: 0;
+  box-shadow: inset 0 0 30px rgba(0, 0, 0, .4);
+}
+.rei-head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.ct-toggle {
+  flex: none; width: 20px; height: 20px; border-radius: 6px; padding: 0;
+  background: rgba(255, 255, 255, .05); border: 1px solid var(--line);
+  color: var(--dim-2); display: grid; place-items: center; transition: all .16s;
+}
+.ct-toggle:hover { color: #fff; border-color: #33507c; background: rgba(255, 255, 255, .1); }
+.ct-toggle svg { width: 13px; height: 13px; transition: transform .22s ease; }
+.center-grid.mini .ct-toggle svg { transform: rotate(180deg); }
+
+/* ── 折叠后的迷你中央面板 ── */
+.center-grid.mini {
+  height: auto; width: 100%;
+  display: flex; flex-direction: column; gap: 8px;
+  padding: 11px 13px;
+}
+.center-grid.mini .rei-box {
+  grid-column: auto; grid-row: auto;
+  flex-direction: row; align-items: center; gap: 12px;
+  padding: 0; background: none; border: none; box-shadow: none;
+}
+.center-grid.mini .rei-head { flex: none; flex-direction: column; align-items: flex-start; gap: 2px; }
+.center-grid.mini .rei-head .rei-delta { display: none; }
+.center-grid.mini .rei-label { white-space: nowrap; }
+.center-grid.mini .ct-toggle { position: absolute; top: 8px; right: 8px; }
+.center-grid.mini .rei-value { font-size: 26px; text-shadow: none; }
+.center-grid.mini .rei-sub { margin: 0; white-space: nowrap; }
+.center-grid.mini .rei-chart,
+.center-grid.mini .mini-stats,
+.center-grid.mini .asset-split { display: none; }
+.center-grid.mini .turn-box {
+  grid-column: auto; grid-row: auto;
+  padding: 0; background: none; border: none;
+  display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
+}
+.center-grid.mini .turn-label { display: none; }
+.center-grid.mini .turn-player { font-size: 15px; }
+.center-grid.mini .turn-hint { font-size: 10.5px; margin: 0; }
+.center-grid.mini .dice-box {
+  grid-column: auto; grid-row: auto;
+  flex-direction: row; align-items: center; gap: 10px;
+  padding: 6px 10px; margin-top: 2px;
+}
+.center-grid.mini .die { --die-sz: 30px; border-radius: 7px; padding: 3.5px; gap: 1px; }
+.center-grid.mini .dice-total { font-size: 12px; min-height: 0; }
+.center-grid.mini .center-actions {
+  grid-column: auto; grid-row: auto;
+  flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 7px;
+}
+.center-grid.mini .center-actions .btn { padding: 9px 15px; font-size: 12.5px; width: auto; flex: 1 1 auto; }
+
+/* 折叠后中央显示的实时排行榜 */
+.mini-rank { display: none; }
+.center-grid.mini .mini-rank {
+  display: block;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 10px; margin-top: 2px;
+}
+.mini-rank .mr-head {
+  font-size: 10px; letter-spacing: 2.5px; color: var(--dim-2);
+  text-align: center; margin-bottom: 10px;
+}
+.mini-rank .mr-row {
+  display: grid; grid-template-columns: 16px 12px 1fr 90px 82px;
+  align-items: center; gap: 8px; padding: 5px 4px; border-radius: 7px;
+  font-size: 12px; transition: background .2s;
+}
+.mini-rank .mr-row.lead { background: rgba(245, 196, 81, .08); }
+.mini-rank .mr-row.dead { opacity: .4; }
+.mini-rank .mr-i { font-size: 11px; color: var(--dim-2); font-variant-numeric: tabular-nums; }
+.mini-rank .mr-row.lead .mr-i { color: var(--gold); font-weight: 800; }
+.mini-rank .mr-dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
+.mini-rank .mr-n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-rank .mr-bar { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, .06); overflow: hidden; }
+.mini-rank .mr-bar i { display: block; height: 100%; border-radius: 4px; transition: width .5s cubic-bezier(.3, 1, .4, 1); }
+.mini-rank .mr-v {
+  text-align: right; font-variant-numeric: tabular-nums; font-weight: 700;
+  /* 10 位数金额会顶破写死的 82px 列宽，并把整个 #mini-rank 撑宽（实测 92/82）。 */
+  min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.rei-label { font-size: 10.5px; color: var(--dim-2); letter-spacing: 1.6px; }
+.rei-delta { font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rei-delta.up { color: var(--up); }
+.rei-delta.down { color: var(--down); }
+.rei-value {
+  font-size: clamp(30px, 3.4vw, 46px); font-weight: 800; line-height: 1.02;
+  letter-spacing: -1px; color: #fff;
+  text-shadow: 0 0 30px rgba(90, 169, 230, .45);
+}
+.rei-sub { font-size: 10.5px; color: var(--dim-2); margin-bottom: 4px; }
+.rei-sub b { color: var(--gold); }
+.rei-chart { flex: 1; min-height: 56px; margin-top: 2px; }
+.rei-chart svg { width: 100%; height: 100%; display: block; }
+
+.turn-box {
+  grid-column: 2; grid-row: 1;
+  position: relative;
+  background: linear-gradient(180deg, rgba(11, 20, 34, .92), rgba(9, 16, 28, .92));
+  border: 1px solid #1f304c; border-left-width: 3px; border-radius: 10px;
+  padding: 9px 12px;
+}
+.turn-label { font-size: 10px; color: var(--dim-2); letter-spacing: 1.4px; }
+.turn-player { font-size: 19px; font-weight: 800; letter-spacing: .5px; }
+.turn-hint { font-size: 11px; color: var(--dim); margin-top: 3px; line-height: 1.4; }
+
+/* ── 回合倒计时（只在联机 + 轮到我 + 服务端给了 deadline 时出现）──
+   --tt 是剩余时间占本阶段总时长的百分比，由 ui.js 每秒写入。 */
+#turn-timer {
+  position: relative; overflow: hidden;
+  margin-top: 7px;
+  display: inline-flex; align-items: center;
+  padding: 3px 10px 5px; border-radius: 999px;
+  font-size: 12px; font-weight: 700; letter-spacing: .3px;
+  font-variant-numeric: tabular-nums;
+  color: #93b4d8;                                   /* 正常：低调灰蓝 */
+  background: rgba(90, 169, 230, .09);
+  border: 1px solid rgba(90, 169, 230, .26);
+  transition: color .2s, background .2s, border-color .2s;
+}
+#turn-timer::after {                                /* 剩余时间进度条 */
+  content: ''; position: absolute; left: 0; bottom: 0; height: 2px;
+  width: var(--tt, 100%); background: currentColor; opacity: .5;
+  transition: width .9s linear;
+}
+#turn-timer.warn {                                  /* 剩余 ≤ 30 秒：琥珀色 + 轻微呼吸 */
+  color: #fbbf24;
+  background: rgba(251, 146, 60, .14);
+  border-color: rgba(251, 191, 36, .55);
+  animation: timerBreath 1.1s ease-in-out infinite;
+}
+@keyframes timerBreath {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .55; }
+}
+#turn-timer.hide { display: none; }
+.center-grid.mini #turn-timer { margin: 0; padding: 2px 8px 4px; font-size: 11px; }
+
+.dice-box {
+  grid-column: 2; grid-row: 2;
+  position: relative;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 10px;
+  background: radial-gradient(circle at 50% 50%, rgba(24, 42, 70, .7), rgba(10, 18, 30, .8));
+  border: 1px solid #1f304c; border-radius: 10px;
+}
+.dice-row { display: flex; align-items: center; gap: 11px; }
+.die {
+  --die-sz: 52px;                     /* ★ 骰子尺寸作为单一真源，字号从它派生 */
+  width: var(--die-sz); height: var(--die-sz); border-radius: 12px; padding: 6px;
+  background: linear-gradient(158deg, #ffffff, #c9d5e6);
+  display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr);
+  gap: 2px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, .6), inset 0 -3px 6px rgba(0, 0, 0, .16), inset 0 2px 3px #fff;
+}
+.die i { border-radius: 50%; background: transparent; }
+.die i.on {
+  background: radial-gradient(circle at 34% 30%, #4b5670, #131a29 75%);
+  box-shadow: inset 0 -1px 1px rgba(255, 255, 255, .25);
+}
+.die.rolling { animation: shake .13s infinite; }
+/* ★ d12 模式：一颗骰子，点数 7~12 用点阵画不出来，直接显示数字。
+   字号必须**从骰子尺寸派生**，不能跟视口宽走 ——
+   早先是 clamp(20px, 2.3vw, 34px)：骰子固定 52px 而宽屏上字号涨到 34px，数字顶出框；
+   mini 模式的骰子只有 30px，却共用同一套字号，溢出更明显（实测截图确认）。
+   现在 --die-sz 一处定义，普通/mini 各自只改这一个值。 */
+.die.num {
+  display: grid; place-items: center; padding: 0;
+  overflow: hidden;                   /* 兜底：任何字体度量差异都不会画出框外 */
+  background: linear-gradient(158deg, #ffffff, #c9d5e6);
+}
+.die.num span {
+  font-size: calc(var(--die-sz) * 0.54);   /* 52px→28px，30px→16px，都留足余量 */
+  font-weight: 900; letter-spacing: -.5px;
+  color: #1b2436; line-height: 1;
+  text-shadow: 0 1px 0 #fff;
+}
+@keyframes shake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-3px, 2px) rotate(-9deg); }
+  75% { transform: translate(3px, -2px) rotate(9deg); }
+}
+.dice-total {
+  font-size: 14px; font-weight: 800; color: var(--gold); letter-spacing: .5px;
+  min-height: 18px;
+}
+
+.center-actions {
+  grid-column: 2; grid-row: 3 / 6;
+  position: relative;
+  display: flex; flex-direction: column; gap: 7px; justify-content: flex-end;
+}
+.center-actions .btn { padding: 11px 16px; font-size: 13px; width: 100%; }
+
+/* 局面速览 */
+.mini-stats {
+  /* 三栏布局：统计块挪到第 3 栏，占上半部分 */
+  grid-column: 3; grid-row: 1 / 3;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+  align-content: start; min-height: 0;
+}
+.ms-item {
+  background: rgba(255, 255, 255, .035);
+  border: 1px solid var(--line-soft); border-radius: 8px;
+  padding: 6px 9px; min-width: 0;
+}
+.ms-item span { display: block; font-size: 9.5px; color: var(--dim-2); letter-spacing: .6px; }
+.ms-item b {
+  font-size: 14px; font-weight: 800; letter-spacing: -.2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+}
+.ms-item.wide { grid-column: 1 / 3; }
+
+/* 资产构成条 */
+.asset-split { grid-column: 3; grid-row: 3 / 6; align-self: start; min-width: 0; min-height: 0; }
+.asset-split .as-head {
+  display: flex; justify-content: space-between; gap: 8px;
+  font-size: 9.5px; color: var(--dim-2); letter-spacing: .6px; margin-bottom: 6px;
+}
+.asset-split .as-head b { color: var(--dim); }
+.asset-split .as-bar {
+  display: flex; height: 10px; border-radius: 5px; overflow: hidden;
+  background: rgba(255, 255, 255, .05);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .55);
+}
+.asset-split .as-bar i { display: block; height: 100%; transition: width .4s cubic-bezier(.3, 1, .4, 1); }
+.asset-split .as-legend {
+  display: flex; flex-wrap: wrap; gap: 3px 11px; margin-top: 8px;
+  font-size: 10px; color: var(--dim);
+}
+.asset-split .as-legend span { display: flex; align-items: center; gap: 4px; white-space: nowrap; }
+.asset-split .as-legend em { width: 7px; height: 7px; border-radius: 2px; display: inline-block; }
+
+/* ════════════════ 右侧面板 ════════════════ */
+#side { display: grid; grid-template-rows: minmax(0, 1.72fr) minmax(0, 1fr); gap: 14px; min-height: 0; }
+.panel {
+  background: linear-gradient(180deg, var(--panel), #0d1727);
+  border: 1px solid var(--line); border-radius: var(--radius);
+  display: flex; flex-direction: column; min-height: 0; overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.panel-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 13px; font-weight: 700; font-size: 12px; letter-spacing: 1.2px;
+  border-bottom: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(255,255,255,.045), transparent);
+  color: #cfe0f5;
+}
+.panel-foot {
+  padding: 7px 13px; font-size: 10.5px; color: var(--dim-2); line-height: 1.5;
+  border-top: 1px solid var(--line-soft); background: rgba(0, 0, 0, .16);
+}
+.qty-picker { display: flex; align-items: center; gap: 5px; font-weight: 500; color: var(--dim-2); font-size: 11px; letter-spacing: 0; }
+.qty-picker select {
+  background: #1a2942; color: var(--text); border: 1px solid var(--line);
+  border-radius: 7px; padding: 3px 6px; font-size: 11px; font-family: inherit;
+}
+
+.market-list { overflow-y: auto; flex: 1; }
+.stock {
+  display: block;
+  padding: 8px 12px 9px; border-bottom: 1px solid var(--line-soft);
+  position: relative; transition: background .15s;
+}
+.stock::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--sc, transparent);
+}
+.stock:hover { background: rgba(90, 169, 230, .07); }
+.stock .s-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.stock .s-name { font-size: 12.5px; font-weight: 700; display: flex; align-items: center; gap: 5px; }
+.stock .s-code {
+  font-size: 9px; color: var(--dim-2); font-weight: 600;
+  border: 1px solid var(--line); border-radius: 3px; padding: 0 3px;
+}
+.stock .s-desc {
+  font-size: 9.5px; color: var(--dim-2); margin-top: 2px; line-height: 1.35;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.stock .s-price { text-align: right; flex: none; font-variant-numeric: tabular-nums; }
+.stock .s-price b { font-size: 14px; letter-spacing: -.2px; }
+.stock .s-price .delta { display: block; font-size: 10px; font-weight: 700; }
+.stock .s-spark { height: 22px; margin: 6px 0 5px; }
+.stock .s-spark svg { width: 100%; height: 100%; display: block; }
+.stock .s-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.stock .s-hold {
+  font-size: 10px; color: var(--dim); font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stock .s-act { display: flex; gap: 5px; flex: none; }
+.stock .s-act button {
+  padding: 4px 15px; font-size: 11px; border-radius: 7px; font-weight: 700;
+  border: 1px solid #2b4160; background: rgba(255, 255, 255, .04); color: var(--dim);
+  transition: all .14s;
+}
+.stock .s-act button.buy:hover:not(:disabled) { background: #14532d; color: #bbf7d0; border-color: #22c55e; }
+.stock .s-act button.sell:hover:not(:disabled) { background: #7f1d1d; color: #fecaca; border-color: #ef4444; }
+.stock.dead { opacity: .38; }
+
+/* ════════════════ 金融产品 ════════════════ */
+/* 地块详情页的角色头牌 */
+.tc-head {
+  display: flex; align-items: center; gap: 12px;
+  margin: -4px 0 12px; padding: 10px 12px;
+  border-radius: 10px; border: 1px solid var(--line-soft);
+  background: linear-gradient(100deg, color-mix(in srgb, var(--ec, #5f7392) 15%, transparent), rgba(255, 255, 255, .02));
+}
+.tc-head .ava.big {
+  position: relative; width: 46px; height: 46px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; overflow: hidden;
+  background: radial-gradient(circle at 32% 26%,
+    color-mix(in srgb, var(--ec, #5f7392) 58%, #0b1220), #0b1220 80%);
+  border: 2px solid color-mix(in srgb, var(--ec, #5f7392) 75%, transparent);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--ec, #5f7392) 45%, transparent);
+  color: var(--ec);
+}
+.tc-head .ava.big svg { width: 26px; height: 26px; display: block; }
+.tc-head .ava.big img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.tc-head .ava.big.has-img svg { display: none; }
+.tc-head .tc-name { font-size: 17px; font-weight: 800; letter-spacing: .5px; }
+.tc-head .tc-sub { font-size: 11px; color: var(--dim-2); margin-top: 2px; }
+
+.card-list { overflow-y: auto; flex: 1; }
+.card-row { padding: 10px 12px; border-bottom: 1px solid var(--line-soft); transition: background .15s; }
+.card-row.held { background: rgba(52, 211, 153, .06); }
+.card-row:hover { background: rgba(90, 169, 230, .06); }
+.card-row .cr-head { display: flex; align-items: center; gap: 7px; }
+.card-row .cr-head b { font-size: 12.5px; }
+.card-row .cr-tag {
+  font-size: 9px; color: var(--dim-2); border: 1px solid var(--line);
+  border-radius: 4px; padding: 0 4px; white-space: nowrap;
+}
+.card-row .cr-cost {
+  margin-left: auto; font-size: 13px; font-weight: 800; color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+.card-row .cr-desc { font-size: 10.5px; color: var(--dim); line-height: 1.5; margin: 5px 0 7px; }
+.card-row .cr-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.card-row .cr-state { font-size: 10px; color: var(--dim-2); }
+.card-row.held .cr-state { color: var(--up); }
+.card-row .cr-buy, .mini-buy {
+  border: 1px solid rgba(245, 196, 81, .4); background: rgba(245, 196, 81, .13);
+  color: var(--gold); font-weight: 700; transition: all .14s;
+}
+.card-row .cr-buy { padding: 5px 17px; font-size: 11.5px; border-radius: 7px; }
+.card-row .cr-buy:hover:not(:disabled), .mini-buy:hover:not(:disabled) { background: rgba(245, 196, 81, .28); }
+.mini-buy { padding: 2px 10px; font-size: 10px; border-radius: 5px; margin-left: 7px; }
+
+.player-list { overflow-y: auto; flex: 1; padding: 7px; display: flex; flex-direction: column; gap: 7px; }
+.pcard {
+  position: relative;
+  border: 1px solid #22314b; border-left: 4px solid var(--pc, #555);
+  border-radius: 9px; padding: 8px 10px;
+  background: linear-gradient(100deg, color-mix(in srgb, var(--pc) 12%, transparent), rgba(19, 31, 51, .9) 42%);
+  transition: box-shadow .2s, transform .15s;
+}
+.pcard.active {
+  background: linear-gradient(100deg, color-mix(in srgb, var(--pc) 26%, transparent), rgba(24, 40, 66, .95) 46%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 55%, transparent), 0 6px 18px rgba(0, 0, 0, .4);
+  transform: translateX(-2px);
+}
+.pcard.dead { opacity: .4; filter: grayscale(1); }
+/* 联机时标出"我自己"那一张：别人的回合也能一眼找到自己的仓位 */
+.pcard.mine {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--pc) 45%, transparent), 0 4px 14px rgba(0, 0, 0, .35);
+}
+.pcard .pc-tag.me {
+  color: #0b1420; background: var(--gold); border-color: transparent; font-weight: 800;
+}
+.pcard .pc-top { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 12px; }
+.pcard .pc-tag {
+  font-size: 9px; color: var(--dim-2); border: 1px solid var(--line);
+  padding: 0 4px; border-radius: 4px; font-weight: 500;
+}
+.pcard .pc-cash { font-size: 16px; font-weight: 800; letter-spacing: -.3px; margin-top: 3px; }
+.pcard .pc-net { font-size: 10.5px; color: var(--dim); }
+.pcard .pc-meta { font-size: 10.5px; color: var(--dim-2); margin-top: 3px; }
+
+/* ════════════════ 日志 ════════════════ */
+#bottom {
+  border-top: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(10, 18, 31, .96), rgba(6, 11, 20, .98));
+  display: grid; grid-template-columns: 92px 1fr;
+  height: 128px; min-height: 128px;
+  box-shadow: 0 -12px 30px rgba(0, 0, 0, .35);
+  /* ★ 抬到棋盘之上：之前棋盘比可用空间高时，底部会被中间那块压住 */
+  position: relative; z-index: 60;
+}
+.log-head {
+  padding: 10px 8px; font-size: 10.5px; letter-spacing: 1.6px; color: var(--dim-2);
+  border-right: 1px solid var(--line-soft); text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+}
+.log-btn {
+  font: inherit; font-size: 10px; letter-spacing: .5px; cursor: pointer;
+  color: var(--gold); background: rgba(245, 196, 81, .1);
+  border: 1px solid rgba(245, 196, 81, .35); border-radius: 6px;
+  padding: 3px 7px; white-space: nowrap; transition: background .15s;
+}
+.log-btn:hover { background: rgba(245, 196, 81, .22); }
+
+/* ★ 展开状态：日志占满顶栏以下的整屏，任何东西都挡不住 */
+#bottom.expanded {
+  position: fixed; left: 0; right: 0; top: 56px; bottom: 0;
+  height: auto; min-height: 0; z-index: 900;
+  grid-template-columns: 112px 1fr;
+  box-shadow: 0 -24px 70px rgba(0, 0, 0, .7);
+  animation: logExpand .18s ease;
+}
+@keyframes logExpand { from { opacity: .6; } to { opacity: 1; } }
+#bottom.expanded #log { font-size: 13.5px; line-height: 1.95; padding: 14px 26px 40px; }
+#bottom.expanded .log-head { font-size: 12px; letter-spacing: 3px; }
+
+#log { overflow-y: auto; padding: 7px 14px; font-size: 11.5px; line-height: 1.7; }
+.log-line { color: var(--dim); animation: logIn .2s ease; }
+@keyframes logIn { from { opacity: 0; transform: translateX(-6px); } }
+.log-line .q {
+  color: #3d5573; margin-right: 7px; font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.log-line.good { color: #86efac; }
+.log-line.warn { color: #fcd34d; }
+.log-line.bad { color: #fca5a5; }
+.log-line.trade { color: #93c5fd; }
+.log-line.dividend { color: #c4b5fd; }
+.log-line.quarter {
+  color: #fff; font-weight: 700; margin-top: 5px;
+  border-top: 1px dashed rgba(255, 255, 255, .12); padding-top: 4px;
+}
+
+/* ════════════════ 弹窗 ════════════════ */
+#modal-root { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+.modal-mask {
+  position: absolute; inset: 0; pointer-events: auto;
+  background: rgba(3, 7, 15, .74);
+  backdrop-filter: blur(3px);
+  display: grid; place-items: center;
+  animation: fade .16s ease;
+}
+@keyframes fade { from { opacity: 0; } }
+.modal {
+  position: relative;
+  width: min(470px, 92vw); max-height: 88vh; overflow-y: auto;
+  background: linear-gradient(180deg, #17253f, #111c2f);
+  border: 1px solid #2f4467; border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, .75), inset 0 1px 0 rgba(255, 255, 255, .06);
+  animation: rise .2s cubic-bezier(.2, 1.2, .4, 1);
+}
+.modal::before {
+  content: ''; position: absolute; left: 22px; right: 22px; top: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: .8; border-radius: 2px;
+}
+@keyframes rise { from { transform: translateY(14px) scale(.97); opacity: 0; } }
+.modal h2 { margin: 0 0 4px; font-size: 19px; letter-spacing: .5px; }
+.modal .m-sub { color: var(--dim-2); font-size: 12px; margin-bottom: 13px; line-height: 1.5; }
+.modal .m-body { font-size: 13px; line-height: 1.75; color: #cbd8ea; }
+.modal .m-body .kv {
+  display: flex; justify-content: space-between; gap: 12px; padding: 4px 0;
+  border-bottom: 1px dashed rgba(120, 160, 210, .16);
+}
+.modal .m-body .kv:last-child { border-bottom: none; }
+.modal .m-body .kv > span:first-child { color: var(--dim); flex: none; }
+.modal .m-body .kv b { text-align: right; }
+.modal .m-actions { display: flex; gap: 9px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+.modal .m-actions .btn { padding: 10px 20px; }
+
+.card-face {
+  position: relative; overflow: hidden;
+  border-radius: 14px; padding: 22px 18px; text-align: center; margin-bottom: 12px;
+  border: 1px solid #3a4f77;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, .35);
+}
+.card-face::after {
+  content: ''; position: absolute; inset: 7px; border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, .12); pointer-events: none;
+}
+.card-face.chance { background: linear-gradient(158deg, #0f5b86, #062a41); }
+.card-face.fate { background: linear-gradient(158deg, #5b21b6, #2a1055); }
+.card-face .cf-k { font-size: 10.5px; letter-spacing: 5px; opacity: .8; }
+.card-face .cf-t {
+  font-size: 24px; font-weight: 800; margin: 8px 0; letter-spacing: 3px;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, .5);
+}
+.card-face .cf-d { font-size: 12.5px; color: #d5e0f0; line-height: 1.65; }
+
+table.rank { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.rank th, table.rank td { padding: 7px 8px; text-align: right; border-bottom: 1px solid rgba(120, 160, 210, .14); }
+table.rank th { color: var(--dim-2); font-weight: 600; font-size: 11px; letter-spacing: .5px; }
+table.rank th:first-child, table.rank td:first-child { text-align: left; }
+table.rank tr.win td { color: var(--gold); font-weight: 800; }
+.rent-table { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; font-size: 12px; margin-top: 7px; }
+.rent-table > span:nth-child(3n) { text-align: right; font-variant-numeric: tabular-nums; }
+.rent-table .now { color: var(--gold); font-weight: 700; }
+
+/* ════════════════ 开局设置 ════════════════ */
+.overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background:
+    radial-gradient(900px 620px at 50% -6%, rgba(90, 169, 230, .16), transparent 62%),
+    radial-gradient(700px 520px at 82% 96%, rgba(245, 196, 81, .1), transparent 65%),
+    linear-gradient(180deg, #0a1322, #05080f);
+  display: grid; place-items: center;
+  animation: fade .3s ease;
+}
+.overlay.hide { display: none; }
+.setup-card { width: min(540px, 94vw); text-align: center; position: relative; }
+.setup-card h1 {
+  font-size: 40px; margin: 0 0 8px; letter-spacing: 8px; font-weight: 800;
+  background: linear-gradient(100deg, #ffffff 14%, var(--gold) 78%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 6px 26px rgba(245, 196, 81, .28));
+}
+.setup-card .sub { color: var(--dim); margin: 0 0 24px; font-size: 13px; letter-spacing: 1px; }
+/* ★ 必须写 minmax(0,1fr)，不能写 1fr。
+   `1fr` 等于 `minmax(auto,1fr)`，下限取 min-content；而 `.slot input{min-width:0}` 只解除
+   flex 的自动最小尺寸、**不改变它对容器 min-content 的贡献**（文本框的内在宽度 ~151px），
+   于是单条轨道实测被撑到 284px、两列 579px > 容器 540px，右列控件溢出卡片 39px。
+   实测 7/7 分辨率都命中，是开局页最显眼的破相。 */
+.slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; margin-bottom: 20px; }
+.slot {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255, 255, 255, .035);
+  border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px;
+  backdrop-filter: blur(6px);
+  transition: border-color .2s, transform .15s;
+}
+.slot:hover { border-color: #33507c; transform: translateY(-1px); }
+.slot .dot {
+  width: 15px; height: 15px; border-radius: 50%; flex: none;
+  box-shadow: 0 0 12px currentColor, inset 0 0 4px rgba(255, 255, 255, .5);
+}
+.slot input {
+  flex: 1; min-width: 0; background: rgba(6, 12, 22, .8); border: 1px solid var(--line);
+  border-radius: 7px; color: var(--text); padding: 6px 8px; font-size: 12px; font-family: inherit;
+}
+.slot input:focus { outline: none; border-color: var(--blue); }
+.slot select {
+  background: rgba(26, 41, 66, .9); color: var(--text); border: 1px solid var(--line);
+  border-radius: 7px; padding: 6px; font-size: 12px; font-family: inherit;
+}
+.setup-opts { display: flex; gap: 22px; justify-content: center; margin-bottom: 22px; font-size: 12px; color: var(--dim); }
+.setup-opts select {
+  background: rgba(26, 41, 66, .9); color: var(--text); border: 1px solid var(--line);
+  border-radius: 7px; padding: 5px 7px; font-size: 12px; font-family: inherit; margin-left: 7px;
+}
+.setup-card .tip { color: var(--dim-2); font-size: 11px; margin-top: 16px; line-height: 1.7; }
+
+/* ════════════════ 联机大厅 ════════════════ */
+.lobby-card { width: min(520px, 94vw); }
+.lobby-card h1 { font-size: 30px; letter-spacing: 6px; }
+.lobby-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px 0; }
+.lobby-row input {
+  flex: 1; max-width: 280px; background: rgba(6, 12, 22, .85);
+  border: 1px solid var(--line); border-radius: 9px; color: var(--text);
+  padding: 10px 12px; font-size: 13px; font-family: inherit;
+}
+.lobby-row input:focus { outline: none; border-color: var(--blue); }
+.lobby-row label { font-size: 12px; color: var(--dim); display: flex; align-items: center; gap: 6px; }
+.lobby-row select {
+  background: rgba(26, 41, 66, .9); color: var(--text); border: 1px solid var(--line);
+  border-radius: 7px; padding: 5px 7px; font-size: 12px; font-family: inherit;
+}
+.lobby-btns { display: flex; gap: 10px; justify-content: center; margin: 12px 0 4px; }
+.lobby-sep { color: var(--dim-2); font-size: 11px; margin: 16px 0 6px; letter-spacing: 3px; }
+.lobby-code {
+  font-size: 42px; font-weight: 800; letter-spacing: 14px; color: var(--gold);
+  font-variant-numeric: tabular-nums; margin: 6px 0 4px;
+  text-shadow: 0 0 30px rgba(245, 196, 81, .35);
+}
+.lobby-seats { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; text-align: left; }
+.lobby-seat {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 13px; border-radius: 10px; font-size: 13px;
+  background: rgba(255, 255, 255, .035); border: 1px solid var(--line);
+}
+.lobby-seat.empty { opacity: .55; border-style: dashed; }
+.lobby-seat.me { border-color: rgba(90, 169, 230, .6); background: rgba(90, 169, 230, .1); }
+.lobby-seat .dot { width: 12px; height: 12px; border-radius: 50%; flex: none; box-shadow: 0 0 9px currentColor; }
+.lobby-seat b { flex: 1; }
+.lobby-seat em {
+  font-style: normal; font-size: 10px; padding: 1px 6px; border-radius: 5px;
+  background: rgba(90, 169, 230, .2); color: #9dc9f0;
+}
+.lobby-seat em.ai { background: rgba(139, 143, 245, .18); color: #b9bbf7; }
+.lobby-seat em.off { background: rgba(251, 113, 133, .2); color: #fda4af; }
+.lobby-card code {
+  background: rgba(0, 0, 0, .4); padding: 1px 6px; border-radius: 5px;
+  font-size: 11px; color: var(--gold);
+}
+.lobby-note {
+  text-align: left; font-size: 12px; line-height: 2; color: var(--dim);
+  background: rgba(255, 255, 255, .03); border: 1px solid var(--line);
+  border-radius: 10px; padding: 14px 16px; margin: 14px 0;
+}
+.lobby-warn {
+  font-size: 12px; line-height: 1.7; color: #fbbf24; text-align: left;
+  background: rgba(251, 191, 36, .09); border: 1px solid rgba(251, 191, 36, .3);
+  border-radius: 9px; padding: 10px 13px; margin: 12px 0 0;
+}
+
+/* 联机断线横幅：平时隐藏，SSE 断开时从顶栏下面滑出来 */
+#net-banner {
+  position: fixed; left: 50%; transform: translateX(-50%); top: 56px; z-index: 400;
+  padding: 9px 20px; border-radius: 0 0 11px 11px;
+  background: rgba(251, 113, 133, .16); border: 1px solid rgba(251, 113, 133, .45);
+  color: #fda4af; font-size: 12.5px; letter-spacing: .5px;
+  backdrop-filter: blur(8px); box-shadow: 0 8px 30px rgba(0, 0, 0, .45);
+  animation: nbIn .25s ease;
+}
+#net-banner.hide { display: none; }
+@keyframes nbIn { from { opacity: 0; transform: translate(-50%, -8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* 滚动条 */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #2a3c58; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #3a5074; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* 提示条 */
+.toast {
+  position: fixed; left: 50%; top: 74px; transform: translateX(-50%);
+  background: linear-gradient(180deg, #7f1d1d, #5b1414);
+  border: 1px solid rgba(255, 140, 140, .35);
+  color: #fff; padding: 9px 18px; border-radius: 10px; z-index: 200;
+  font-size: 12.5px; box-shadow: 0 14px 40px rgba(0, 0, 0, .6);
+  animation: rise .2s ease;
+}
+
+@media (max-width: 1280px) {
+  #app.drawer-open main { padding-right: 396px; }
+  #drawers .drawer { width: 302px; right: 78px; }
+  .rei-value { font-size: 34px; }
+}
+@media (max-width: 1020px) {
+  #app.drawer-open main { padding-right: 90px; }
+  #drawers .drawer {
+    right: 78px; width: auto; left: 40px;
+    background: linear-gradient(180deg, #121e32f2, #0b1423f7);
+  }
+}
+@media (max-height: 780px) {
+  #bottom { height: 104px; min-height: 104px; }
+  .rei-value { font-size: 32px; }
+  #drawers .drawer { bottom: 124px; }
+}
+
+/* ════════════════ 顶栏「菜单」二级抽屉 ════════════════
+   顶栏只留「☰ 菜单 + 新游戏」，把存档/读档/导出/导入/规则收进 #drawer-menu，
+   复用 #drawers .drawer / .drawer-head / .drawer-close，皮肤与其它三个抽屉一致。
+   ↓ 以下全是新增追加样式，不改动上面任何已有区块。 */
+#btn-menu.on {                    /* 抽屉打开时高亮，观感对齐 .rail-btn.on */
+  background: linear-gradient(180deg, rgba(90, 169, 230, .3), rgba(90, 169, 230, .07));
+  color: #fff; border-color: rgba(90, 169, 230, .6);
+  box-shadow: 0 0 18px rgba(90, 169, 230, .22);
+}
+/* 菜单只有 5 行，按内容高度收缩，不留一整屏空白（比另外三个抽屉矮） */
+#drawers #drawer-menu {
+  bottom: auto;
+  max-height: calc(100% - 120px);
+}
+.menu-list { display: flex; flex-direction: column; gap: 8px; padding: 12px; }
+.menu-list .btn { width: 100%; text-align: center; padding: 10px 14px; font-size: 12.5px; }
+
+/* ════════════════ 玩家间交易面板 ════════════════
+   #btn-trade 复用 .rail-btn 皮肤；抽屉复用 #drawers .drawer。
+   ↓ 全部是追加样式，不改动上面任何已有区块（.tile / .center-grid / .tk / .drawer 都没碰）。 */
+#btn-trade { position: relative; }        /* 只给角标一个定位锚，不动 .rail-btn 原规则 */
+.rail-btn.hide { display: none; }
+.rail-badge {                             /* 竖排按钮右上角的小红点 / 数字角标（贴着按钮内缘，别撑出 scrollWidth） */
+  position: absolute; top: 3px; right: 3px;
+  min-width: 15px; height: 15px; padding: 0 4px;
+  border-radius: 8px; font-size: 9.5px; font-weight: 800; font-style: normal;
+  color: #fff; display: grid; place-items: center;
+  background: linear-gradient(180deg, #ef4444, #b91c1c);
+  box-shadow: 0 0 0 2px #0b1424, 0 2px 8px rgba(239, 68, 68, .55);
+}
+.rail-badge.hide { display: none; }
+.rail-btn .rsub.wait { color: var(--gold); font-weight: 700; }
+
+.trade-body {
+  flex: 1; min-height: 0; overflow-y: auto;
+  padding: 10px 12px 12px;
+  display: flex; flex-direction: column; gap: 9px;
+}
+.tsec-h { font-size: 10.5px; letter-spacing: 1.6px; color: var(--dim-2); }
+.trade-note {
+  font-size: 11.5px; color: var(--dim); line-height: 1.6;
+  background: rgba(255, 255, 255, .03); border: 1px solid var(--line-soft);
+  border-radius: 9px; padding: 8px 10px;
+}
+.trade-note.warn { color: #fcd34d; border-color: rgba(251, 191, 36, .35); background: rgba(251, 146, 60, .1); }
+.trade-quote {
+  border: 1px solid var(--line); border-radius: 10px; padding: 9px;
+  background: linear-gradient(180deg, rgba(90, 169, 230, .07), rgba(255, 255, 255, .02));
+}
+.tq-line { font-size: 11.5px; color: var(--dim); line-height: 1.6; margin-bottom: 7px; }
+.tq-from { color: var(--gold); }
+.tcols { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+.tcol {
+  min-width: 0; border: 1px solid var(--line-soft); border-radius: 8px;
+  padding: 7px 8px; background: rgba(255, 255, 255, .02);
+}
+.tcol-h {
+  font-size: 10px; letter-spacing: 1.1px; color: var(--dim-2);
+  margin-bottom: 5px; line-height: 1.35; word-break: break-all;
+}
+.trow {
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  font-size: 11.5px; line-height: 1.5; padding: 2px 0;
+}
+.trow.tlab { color: var(--dim-2); font-size: 10.5px; letter-spacing: .8px; margin-top: 4px; }
+.trow.tempty { color: var(--dim-2); font-style: italic; }
+.trow em { font-size: 10px; color: var(--dim-2); font-style: normal; }
+.tamt { color: var(--gold); font-weight: 800; font-variant-numeric: tabular-nums; }
+.tcode { color: var(--blue); font-variant-numeric: tabular-nums; }
+.twarn { color: #fca5a5; font-size: 10px; font-style: normal; }
+.tchk {
+  display: flex; align-items: center; gap: 5px; flex-wrap: wrap;
+  font-size: 11.5px; padding: 2px 0; cursor: pointer;
+}
+.tchk.off { opacity: .42; cursor: not-allowed; }
+.tchk input[type=checkbox] { accent-color: var(--gold); flex: none; width: 13px; height: 13px; margin: 0; }
+.tcash, input[type=number][data-stock], .tpct {
+  flex: none; background: #1a2942; color: var(--text);
+  border: 1px solid var(--line); border-radius: 6px;
+  padding: 3px 6px; font-size: 11.5px; font-family: inherit;
+}
+.tcash { width: 100%; }
+input[type=number][data-stock] { width: 60px; }
+.tpct { width: 46px; }
+.trade-target { display: flex; flex-wrap: wrap; gap: 6px; }
+.tplayer {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255, 255, 255, .04); border: 1px solid var(--line);
+  color: var(--dim); border-radius: 8px; padding: 5px 9px;
+  font-size: 11.5px; font-family: inherit; cursor: pointer;
+}
+.tplayer i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.tplayer:hover { color: #fff; }
+.tplayer.on { color: #fff; border-color: rgba(245, 196, 81, .65); background: rgba(245, 196, 81, .14); }
+.trade-submit-bar {                /* 钉在抽屉底部的提交条，不在滚动区里 */
+  flex: none; display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-top: 1px solid var(--line-soft);
+  background: rgba(0, 0, 0, .2);
+}
+.trade-submit-bar.hide { display: none; }
+.trade-hint { flex: 1; font-size: 10.5px; color: var(--dim-2); line-height: 1.45; }
+.trade-hint.warn { color: #fcd34d; }
+.tbtn-row { display: flex; gap: 7px; margin-top: 8px; }
+.tbtn-row .btn { flex: 1; padding: 8px 10px; font-size: 12px; }
+.trade-submit-bar .btn { flex: none; padding: 8px 14px; font-size: 12px; }
+
+/* ════════════════ 破产地产拍卖弹窗 ════════════════
+   复用 .modal / .modal-mask / .btn 的皮肤，只是更宽一点（一行要塞下
+   地块名 + 等级 + 地区 + 垄断进度 + 出价框 + 参考价）。
+   ↓ 全部是追加样式，不改动上面任何已有区块（.tile / .center-grid / .tk / .drawer / 交易抽屉 都没碰）。 */
+.modal.auction { width: min(660px, 94vw); }
+.modal.auction::before {
+  background: linear-gradient(90deg, transparent, #f59e0b, var(--gold), transparent);
+  opacity: 1;
+}
+.auction .m-body { line-height: 1.5; }
+
+.auction .auc-top {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  margin-bottom: 7px;
+}
+.auc-count { font-size: 11px; color: var(--dim-2); letter-spacing: .6px; }
+.auc-timer {
+  position: relative; overflow: hidden; flex: none;
+  font-size: 12px; font-weight: 800; color: var(--gold);
+  background: rgba(245, 196, 81, .1); border: 1px solid rgba(245, 196, 81, .35);
+  border-radius: 8px; padding: 3px 11px; font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.auc-timer::after {                     /* 剩余时间进度条：--auc 由 tickAuction 每秒更新 */
+  content: ''; position: absolute; left: 0; bottom: 0; height: 2px;
+  width: var(--auc, 100%); background: currentColor; opacity: .85;
+  transition: width .9s linear;
+}
+.auc-timer.warn {
+  color: #fca5a5; border-color: rgba(248, 113, 113, .5); background: rgba(248, 113, 113, .13);
+  animation: aucPulse 1.1s ease-in-out infinite;
+}
+@keyframes aucPulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+
+.auc-rules {
+  font-size: 10.5px; color: var(--dim); line-height: 1.65; margin-bottom: 9px;
+  background: rgba(255, 255, 255, .03); border: 1px solid var(--line-soft);
+  border-radius: 9px; padding: 7px 10px;
+}
+.auc-rules b { color: var(--gold); }
+
+.auc-list {
+  display: flex; flex-direction: column; gap: 6px;
+  max-height: 44vh; overflow-y: auto; padding-right: 2px;
+}
+.auc-row {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  border: 1px solid var(--line-soft); border-radius: 10px;
+  padding: 7px 9px; background: rgba(255, 255, 255, .02);
+}
+.auc-row.mortgaged { opacity: .72; }
+.auc-main { flex: 1 1 170px; min-width: 0; }
+.auc-nm {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.auc-meta {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  margin-top: 3px; font-size: 10px; color: var(--dim-2);
+}
+.auc-lv { color: var(--dim); }
+.auc-tag { display: inline-flex; align-items: center; gap: 4px; }
+.auc-gdot { width: 7px; height: 7px; border-radius: 50%; flex: none; display: inline-block; }
+.auc-prog {
+  border: 1px solid var(--line); border-radius: 5px; padding: 0 4px;
+  font-variant-numeric: tabular-nums;
+}
+.auc-prog.full { color: var(--gold); border-color: rgba(245, 196, 81, .55); background: rgba(245, 196, 81, .12); }
+.auc-mg { color: #fcd34d; }
+
+.auc-bidbox { flex: none; display: flex; align-items: center; gap: 5px; }
+.auc-cur { font-size: 12px; color: var(--dim-2); }
+.auction .auc-bid {
+  width: 90px; background: #1a2942; color: var(--text);
+  border: 1px solid var(--line); border-radius: 7px;
+  padding: 4px 7px; font-size: 12.5px; font-family: inherit;
+  font-variant-numeric: tabular-nums; text-align: right;
+}
+.auction .auc-bid:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 2px rgba(245, 196, 81, .18); }
+.auction .auc-bid:disabled { opacity: .6; cursor: not-allowed; }
+.auc-min { font-size: 9.5px; color: var(--dim-2); white-space: nowrap; }
+.auc-nobid { color: var(--dim-2); font-size: 12px; }
+
+.auc-ref { flex: none; text-align: right; min-width: 76px; }
+.auc-ref span { display: block; font-size: 9.5px; color: var(--dim-2); }
+.auc-ref b { font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+
+.auc-total {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin-top: 11px; padding: 9px 11px; border-radius: 10px;
+  border: 1px solid var(--line); background: rgba(0, 0, 0, .22);
+}
+.auc-total.over {
+  border-color: rgba(248, 113, 113, .6); background: rgba(248, 113, 113, .11);
+  box-shadow: inset 0 0 0 1px rgba(248, 113, 113, .18);
+}
+.auc-total .auc-fill { flex: none; padding: 6px 11px; font-size: 11.5px; }
+.auc-sum {
+  display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+  font-size: 11.5px; color: var(--dim-2); margin-left: auto;
+}
+.auc-sum b { font-size: 15px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; }
+.auc-sum b.over { color: #f87171; }
+.auc-sum .sep { color: var(--dim-2); }
+.auc-total #auc-hint { flex: 1 1 100%; margin: 0; }
+.auc-lock { margin-top: 9px; }
+
+.auc-foot {
+  display: flex; justify-content: space-between; gap: 10px;
+  margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(120, 160, 210, .2);
+  font-size: 12px; color: var(--dim-2);
+}
+.auc-foot b { color: var(--text); }
+.auc-foot b.ok { color: var(--gold); }
+.auc-res-list {
+  display: flex; flex-direction: column; gap: 5px;
+  max-height: 46vh; overflow-y: auto;
+}
+.auc-res-row {
+  font-size: 12px; line-height: 1.5; padding: 6px 9px; border-radius: 8px;
+  border: 1px solid var(--line-soft); background: rgba(255, 255, 255, .02);
+  color: var(--dim);
+}
+.auc-res-row.trade { color: var(--text); border-color: rgba(90, 169, 230, .35); }
+.auc-res-row.good { color: #7ee0b0; border-color: rgba(52, 211, 153, .35); }
+.auc-res-row.warn { color: #fcd34d; border-color: rgba(251, 191, 36, .35); }
+@media (max-width: 620px) {              /* 窄屏：出价框换行到第二行，别把行撑破 */
+  .auc-list { max-height: 38vh; }
+  .auc-ref { min-width: 62px; }
+  .auc-sum { margin-left: 0; }
+}

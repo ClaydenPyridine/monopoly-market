@@ -1,0 +1,22 @@
+{
+  "name": "monopoly-market",
+  "version": "0.10.0",
+  "private": true,
+  "description": "地产股神 —— 不依赖纸质地图的大富翁 + 地产指数 + 股市（纯前端，无需构建）",
+  "scripts": {
+    "build": "node tools/build-single.mjs",
+    "serve": "node server.mjs",
+    "lan": "node server.mjs",
+    "sim": "node tools/sim.mjs 200",
+    "test": "node tools/test-rules.mjs && node tools/test-ui.mjs && node tools/test-ui.mjs dist/地产股神.html && node tools/test-net.mjs && node tools/test-trade.mjs && node tools/test-auction-net.mjs",
+    "test:rules": "node tools/test-rules.mjs",
+    "test:ui": "node tools/test-ui.mjs",
+    "test:net": "node tools/test-net.mjs",
+    "test:trade": "node tools/test-trade.mjs",
+    "test:auction": "node tools/test-auction-net.mjs",
+    "tune": "node tools/tune.mjs --games 300"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1"
+  }
+}

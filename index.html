@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>地产股神 · 大富翁 + 股市</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app">
+  <div id="net-banner" class="hide"></div>
+  <header id="topbar">
+    <div class="brand">
+      <span class="logo">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M3 21h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M5 21V11l5-3.5V21" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <path d="M14 21V7l5 3v11" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          <circle cx="17.5" cy="4" r="1.6" fill="currentColor"/>
+        </svg>
+      </span>
+      地产股神 <span class="ver">v0.10</span>
+    </div>
+    <div class="topstats">
+      <div class="ts"><label>季度</label><b id="ts-quarter">1 / 10</b></div>
+      <div class="ts"><label>地产指数</label><b id="ts-rei">100.0</b><span class="delta" id="ts-rei-delta"></span></div>
+      <div class="ts"><label>当前玩家</label><b id="ts-current">—</b></div>
+    </div>
+    <div class="topactions">
+      <!-- 低频操作收进「菜单」二级抽屉（#drawer-menu），顶栏只留菜单 + 新游戏 -->
+      <button class="btn ghost" id="btn-menu" title="菜单：存档 / 读档 / 导出 / 导入 / 规则（Esc 关闭）">☰ 菜单</button>
+      <button class="btn" id="btn-new">新游戏</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="boardwrap">
+      <div id="board">
+        <div id="center">
+          <div class="center-grid" id="center-grid">
+            <div class="rei-box">
+              <div class="rei-head">
+                <span class="rei-label">地产指数 REI</span>
+                <span class="rei-delta" id="rei-delta">—</span>
+                <button class="ct-toggle" id="ct-toggle" title="折叠 / 展开中央面板（快捷键 C）">
+                  <svg viewBox="0 0 24 24" fill="none"><path d="M6 15l6-6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="rei-value" id="rei-value">100.0</div>
+              <div class="rei-sub">地价 / 租金 = 基准 × <b id="rei-mult">100%</b> · 周期 <b id="rei-cycle">平稳</b></div>
+              <div class="rei-chart" id="rei-chart"></div>
+            </div>
+
+            <div class="turn-box" id="turn-box">
+              <div class="turn-label">当前回合</div>
+              <div class="turn-player" id="turn-player">—</div>
+              <div class="turn-hint" id="turn-hint">点击「新游戏」开始</div>
+              <!-- 联机回合倒计时：由 src/ui.js 的 renderTimer() 填充，单机/非我回合时带 hide -->
+              <div id="turn-timer" class="hide"></div>
+            </div>
+
+            <div class="dice-box">
+              <div class="dice-row">
+                <div class="die" id="die1"></div>
+                <div class="die" id="die2"></div>
+              </div>
+              <div class="dice-total" id="dice-total"></div>
+            </div>
+
+            <div class="mini-stats" id="mini-stats"></div>
+            <div class="asset-split" id="asset-split"></div>
+            <div class="mini-rank" id="mini-rank"></div>
+            <div class="center-actions" id="center-actions"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <aside id="rail">
+    <button class="rail-btn" id="btn-market" title="股市行情（快捷键 M）">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M3 20.5h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M5 16.5l4.5-5 3.5 3 6-7" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15 7.5h4v4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="rlab">股市</span>
+      <em class="rsub" id="rail-market-sub">—</em>
+    </button>
+    <button class="rail-btn" id="btn-players" title="玩家与资产（快捷键 P）">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M3.5 19c0-3 2.5-4.8 5.5-4.8s5.5 1.8 5.5 4.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M16 6.2a3 3 0 010 5.6M17.6 19c0-2-.6-3.4-1.6-4.4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span class="rlab">玩家</span>
+      <em class="rsub" id="rail-players-sub">—</em>
+    </button>
+    <button class="rail-btn" id="btn-cards" title="金融产品（快捷键 F）">
+      <svg viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="5" width="18" height="14" rx="2.4" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M3 9.6h18" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M7 14.2h5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      <span class="rlab">金融</span>
+      <em class="rsub" id="rail-cards-sub">—</em>
+    </button>
+    <button class="rail-btn" id="btn-trade" title="玩家间交易：换地 / 换股票 / 谈现金 / 卖分红权（快捷键 T）">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M4 8.5h13.5l-3.2-3.2M20 15.5H6.5l3.2 3.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="rlab">交易</span>
+      <em class="rsub" id="rail-trade-sub">—</em>
+      <i class="rail-badge hide" id="rail-trade-badge">1</i>
+    </button>
+  </aside>
+
+  <footer id="bottom">
+    <div class="log-head">
+      <span>事件日志</span>
+      <button id="log-expand" class="log-btn" title="展开日志（Esc 收起）">⤢ 展开</button>
+    </div>
+    <div id="log"></div>
+  </footer>
+</div>
+
+<div id="drawers">
+  <div class="drawer" id="drawer-market">
+    <div class="drawer-head">
+      <b>股市行情</b>
+      <div class="qty-picker">
+        <label>每次</label>
+        <select id="qty-select">
+          <option value="1">1 股</option>
+          <option value="5">5 股</option>
+          <option value="10">10 股</option>
+          <option value="20">20 股</option>
+          <option value="50">50 股</option>
+          <option value="0">全部</option>
+        </select>
+      </div>
+      <button class="drawer-close" data-close="market" title="关闭">✕</button>
+    </div>
+    <div class="market-list" id="market-list"></div>
+    <div class="panel-foot">定价规则：<b>先吃滑点再成交</b>——买入 +0.5%/股、卖出 −0.8%/股都算进你的成交价，另外买卖各收 1% 手续费，所以同一回合内买卖往返必亏，刷差价没有意义。地产 ETF 直接推动地产指数。</div>
+  </div>
+
+  <div class="drawer" id="drawer-players">
+    <div class="drawer-head">
+      <b>玩家与资产</b>
+      <button class="drawer-close" data-close="players" title="关闭">✕</button>
+    </div>
+    <div class="player-list" id="player-list"></div>
+    <div class="panel-foot">净资产 = 现金 + 地产市值 + 股票市值 − 抵押负债。</div>
+  </div>
+
+  <div class="drawer" id="drawer-cards">
+    <div class="drawer-head">
+      <b>金融产品</b>
+      <button class="drawer-close" data-close="cards" title="关闭">✕</button>
+    </div>
+    <div class="card-list" id="card-list"></div>
+    <div class="panel-foot">高风险产品最多同时持有 1 张（垃圾债券 / 地产期权 二选一）；租金保险与定期存单各最多 1 张。风险投资卡买完立刻开奖，不占额度。</div>
+  </div>
+
+  <div class="drawer" id="drawer-menu">
+    <div class="drawer-head">
+      <b>菜单</b>
+      <button class="drawer-close" data-close="menu" title="关闭">✕</button>
+    </div>
+    <div class="menu-list" id="menu-list">
+      <button class="btn ghost" id="btn-save">存档</button>
+      <button class="btn ghost" id="btn-load">读档</button>
+      <button class="btn ghost" id="btn-export">导出</button>
+      <button class="btn ghost" id="btn-import">导入</button>
+      <button class="btn ghost" id="btn-rules">规则</button>
+    </div>
+    <div class="panel-foot">存档 / 读档走浏览器本地存档；「导出」把当前对局存成 JSON 文件，「导入」用来接上别人发来的存档。联机房间里这些由房主控制，点存档会被拦下并提示。</div>
+  </div>
+
+  <div class="drawer" id="drawer-trade">
+    <div class="drawer-head">
+      <b>玩家间交易</b>
+      <button class="drawer-close" data-close="trade" title="关闭">✕</button>
+    </div>
+    <!-- 内容由 UI.renderTrade() 现填：待处理报价 + 发起报价（单机时只显示一句说明） -->
+    <div class="trade-body" id="trade-body"></div>
+    <!-- 提交条放在滚动区外面，列表再长也一直看得见 -->
+    <div class="trade-submit-bar hide" id="trade-submit-bar"></div>
+    <div class="panel-foot">现金 / 地产 / 股票都能自己谈价；「分红权」是把某块地的收租按比例分给对方（10%~50%，一块地只能卖一次）。同时只能有一笔待回应的报价，谈生意不用等轮到你。</div>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+
+<div id="setup" class="overlay">
+  <div class="setup-card">
+    <h1>地产股神</h1>
+    <p class="sub">不用纸地图的大富翁 · 地价跟着地产指数涨跌 · 还能炒股</p>
+    <div class="slots" id="slots"></div>
+    <div class="setup-opts">
+      <label>游戏时长
+        <select id="opt-quarters">
+          <option value="20">20 季度（约 1 小时）</option>
+          <option value="35" selected>35 季度（约 2 小时）</option>
+          <option value="50">50 季度（约 3 小时）</option>
+        </select>
+      </label>
+      <label>初始现金
+        <select id="opt-cash">
+          <option value="28000">28,000（紧 · 容易被打崩）</option>
+          <option value="40000" selected>40,000（标准 · 调参基准）</option>
+          <option value="55000">55,000（宽松 · 慢慢经营）</option>
+        </select>
+      </label>
+    </div>
+    <button class="btn big" id="btn-start">开始游戏</button>
+    <button class="btn big ghost" id="btn-lan">联机对战</button>
+    <p class="tip">提示：地块顺序、股价、事件全部由程序生成，不需要任何纸质道具。<br>快捷键：空格 = 掷骰子 / 结束回合，M = 股市，P = 玩家，F = 金融，C = 折叠中央面板，Esc = 关闭面板。</p>
+  </div>
+</div>
+
+<div id="lobby" class="overlay hide">
+  <div class="setup-card lobby-card">
+    <h1>联机对战</h1>
+    <div id="lobby-body"></div>
+  </div>
+</div>
+
+<script src="src/data.js"></script>
+<script src="src/engine.js"></script>
+<script src="src/ai.js"></script>
+<script src="src/ui.js"></script>
+<script src="src/net.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+# ── 依赖与构建产物 ──
+node_modules/
+dist/
+
+# ── 运行时数据：对局录像 / 存档 / 日志（含玩家名字，不进仓库）──
+logs/
+saves/
+*.log
+*.jsonl
+
+# ── 本机下载的二进制（54MB，需要时自己下）──
+cloudflared.exe
+cloudflared-*.exe
+
+# ── 系统与编辑器 ──
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# ── 临时标记文件 ──
+_batmark.txt
+_mark.txt
+
+# ── 内部草稿（含玩家昵称的原始数据转储，不进公开仓库）──
+docs/_*.md
